@@ -70,25 +70,10 @@ def get_config(config_path=None):
         parser.add_argument('--model_choice', default=1, type=int)  # threshold for f1# best_model_choice:1 2
 
         # moco & fisher
-        parser.add_argument('--use_moco', action='store_true')
-        parser.add_argument('--use_fisher', action='store_true')
+        parser.add_argument('--use_smoco', action='store_true')
         parser.add_argument('--queue_nums', default=2000, type=int)
-        parser.add_argument('--fisher_loss', type=str, choices=['triplet', 'contrastive', 'FDA', 'FDA_contrastive'], default='FDA')
         parser.add_argument('--momentum', default=0.99, type=float)
-        parser.add_argument('--moco_mode', type=str, choices=['moco', 'MoCoFT', 'MoCoV3', 'SimSiam'], default='moco')
         parser.add_argument('--pos_mode', type=str, choices=['all', 'hard', 'easy'], default='hard')
-
-        # mocomix
-        parser.add_argument('--mixnorm_target', type=str, choices=['pos', 'neg', 'posneg'], default='posneg')
-        parser.add_argument('--postmix_norm', action='store_true')
-        parser.add_argument('--expolation_mask', action='store_true')
-        parser.add_argument('--mask_distribution', type=str, choices=['uniform', 'beta'], default='beta')
-        parser.add_argument('--dim_mask', type=str, choices=['pos', 'neg', 'both', 'none'], default='none')
-        parser.add_argument('--beta_alpha', type=float, default=2.0)
-        parser.add_argument('--sep_alpha', action='store_true')
-        parser.add_argument('--pos_alpha', type=float, default=2.0)
-        parser.add_argument('--neg_alpha', type=float, default=1.6)
-        parser.add_argument('--norm_target', type=str, choices=['pos', 'neg'])
 
         args = parser.parse_args()
 

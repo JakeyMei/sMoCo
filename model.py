@@ -3,9 +3,6 @@ import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn import Linear
-from torch.nn.utils.rnn import pad_sequence
-from torch.nn.init import xavier_normal_
 
 from modules import AttnEncoder
 from modules import Packed
@@ -93,10 +90,10 @@ class KAReader(nn.Module):
 
         self.hidden_dim = self.entity_dim
         # question and doc encoder
-        self.question_encoder = Packed(nn.LSTM(self.word_dim, self.hidden_dim // 2, batch_first=True, bidirectional=True))  # 双向LSTM
+        self.question_encoder = Packed(nn.LSTM(self.word_dim, self.hidden_dim // 2, batch_first=True, bidirectional=True))
 
-        self.self_att_r = AttnEncoder(self.hidden_dim)  # 关系的语义表示
-        self.self_att_q = AttnEncoder(self.hidden_dim)  # 问题的语义表示
+        self.self_att_r = AttnEncoder(self.hidden_dim)
+        self.self_att_q = AttnEncoder(self.hidden_dim)
         self.combine_q_rel = nn.Linear(self.hidden_dim*2, self.hidden_dim)
 
         # doc encoder
@@ -105,7 +102,7 @@ class KAReader(nn.Module):
         self.doc_encoder = Packed(nn.LSTM(self.hidden_dim, self.hidden_dim // 2, batch_first=True, bidirectional=True))
         self.doc_to_ent = nn.Linear(self.hidden_dim, self.hidden_dim)
 
-        self.ent_info_gate = ConditionGate(self.hidden_dim)  # 知识库语义信息
+        self.ent_info_gate = ConditionGate(self.hidden_dim)
         self.ent_info_gate_out = ConditionGate(self.hidden_dim)
 
         self.kg_prop = nn.Linear(self.hidden_dim + self.entity_dim, self.entity_dim)
@@ -117,7 +114,7 @@ class KAReader(nn.Module):
 
         self.attn_match = nn.Linear(self.hidden_dim*3, self.hidden_dim*2)
         self.attn_match_q = nn.Linear(self.hidden_dim*2, self.hidden_dim)
-        self.loss = nn.BCEWithLogitsLoss()  # 度量目标和输出之间的二进制交叉熵的标准 BCELoss + sigmoid
+        self.loss = nn.BCEWithLogitsLoss() 
 
         self.word_drop = nn.Dropout(self.word_drop)
         self.hidden_drop = nn.Dropout(self.hidden_drop)
@@ -135,16 +132,16 @@ class KAReader(nn.Module):
 
     def forward(self, feed, index=None, mode='train', mlp=False):
         # encode questions
-        question = feed['questions']  # 问题
-        q_mask = (question != 1).float()  #
+        question = feed['questions']
+        q_mask = (question != 1).float() 
         q_len = q_mask.sum(-1)  # (B, q_len)
         q_word_emb = self.word_drop(self.word_emb(question))
-        q_emb, _ = self.question_encoder(q_word_emb, q_len, max_length=question.size(1))  # 问题编码
+        q_emb, _ = self.question_encoder(q_word_emb, q_len, max_length=question.size(1))
         q_emb = self.hidden_drop(q_emb)
         B, max_q_len = question.size(0), question.size(1)
 
-        # candidate ent embeddings （候选实体）
-        ent_emb_ = self.entity_emb(feed['candidate_entities'])  # 候选实体编码
+        # candidate ent embeddings
+        ent_emb_ = self.entity_emb(feed['candidate_entities'])
         ent_emb = l_relu(self.entity_linear(ent_emb_))
 
         # # keep a copy of the initial ent_emb
@@ -161,13 +158,13 @@ class KAReader(nn.Module):
         rel_word_mask = (rel_word_ids != 1).float()
         rel_word_lens = rel_word_mask.sum(-1)
         rel_word_lens[rel_word_lens == 0] = 1
-        rel_encoded, _ = self.question_encoder(self.word_drop(self.word_emb(rel_word_ids)), rel_word_lens, max_length=rel_word_ids.size(1)) # (|R|, r_len, h_dim)  # 关系编码
+        rel_encoded, _ = self.question_encoder(self.word_drop(self.word_emb(rel_word_ids)), rel_word_lens, max_length=rel_word_ids.size(1)) # (|R|, r_len, h_dim)
         # rel_encoded, _ = self.relation_encoder(self.word_drop(self.word_emb(rel_word_ids)), rel_word_lens, max_length=rel_word_ids.size(1)) # (|R|, r_len, h_dim)
         rel_encoded = self.hidden_drop(rel_encoded)
-        rel_encoded = self.self_att_r(rel_encoded, rel_word_mask)  # 关系注意力
+        rel_encoded = self.self_att_r(rel_encoded, rel_word_mask)
 
         neighbor_rel_ids = feed['entity_link_rels'].long().view(-1)
-        neighbor_rel_emb = torch.index_select(rel_encoded, dim=0, index=neighbor_rel_ids).view(B*max_num_candidates, max_num_neighbors, self.hidden_dim)  # 提取关系信息
+        neighbor_rel_emb = torch.index_select(rel_encoded, dim=0, index=neighbor_rel_ids).view(B*max_num_candidates, max_num_neighbors, self.hidden_dim)
 
         # for look up
         neighbor_ent_local_index = feed['entity_link_ents'].long()  # (B * |C| * max_num_neighbors)
@@ -179,7 +176,7 @@ class KAReader(nn.Module):
         neighbor_ent_local_index = (neighbor_ent_local_index + 1) * neighbor_ent_local_mask
         neighbor_ent_local_index = neighbor_ent_local_index.view(-1)
 
-        ent_seed_info = feed['query_entities'].float()  # seed entity will have 1.0 score 问题实体
+        ent_seed_info = feed['query_entities'].float()  # seed entity will have 1.0 score
         ent_is_seed = torch.cat([torch.ones(1).to(torch.device('cuda')), ent_seed_info.view(-1)], dim=0)
         ent_seed_indicator = torch.index_select(ent_is_seed, dim=0, index=neighbor_ent_local_index).view(B*max_num_candidates, max_num_neighbors)
 
@@ -188,7 +185,7 @@ class KAReader(nn.Module):
         q_emb_expand = q_emb_expand.view(B*max_num_candidates, max_q_len, -1)
         q_mask_expand = q_mask.unsqueeze(1).expand(B, max_num_candidates, -1).contiguous()
         q_mask_expand = q_mask_expand.view(B*max_num_candidates, -1)
-        q_n_affinity = torch.bmm(q_emb_expand, neighbor_rel_emb.transpose(1, 2))  # (bsize*max_num_candidates, q_len, max_num_neighbors)  # 问题与关系的得分信息
+        q_n_affinity = torch.bmm(q_emb_expand, neighbor_rel_emb.transpose(1, 2))  # (bsize*max_num_candidates, q_len, max_num_neighbors)
         q_n_affinity_mask_q = q_n_affinity - (1 - q_mask_expand.unsqueeze(2)) * 1e20
         q_n_affinity_mask_n = q_n_affinity - (1 - neighbor_mask.view(B*max_num_candidates, 1, max_num_neighbors))
         normalize_over_q = F.softmax(q_n_affinity_mask_q, dim=1)
@@ -204,7 +201,6 @@ class KAReader(nn.Module):
 
         # pooling over the q_len dim
         q_node_emb = rel_aware_q.max(2)[0]
-        # q_node_emb = rel_aware_q.mean(2)
 
         ent_emb = l_relu(self.combine_q(torch.cat([ent_emb, q_node_emb], dim=2)))
         ent_emb_for_lookup = ent_emb.view(-1, self.entity_dim)
@@ -292,7 +288,7 @@ class KAReader(nn.Module):
             answers = ((1.0 - self.label_smooth) * answers) + (self.label_smooth / answers.size(1))
 
         # ent_scores
-        ent_scores = (q_node_emb * ent_emb).sum(2)  # 8 * 1037
+        ent_scores = (q_node_emb * ent_emb).sum(2)
         loss = self.loss(ent_scores, answers)
         pred_dist = (ent_scores - (1-ent_mask) * 1e8).sigmoid() * ent_mask
         pred = torch.max(ent_scores, dim=1)[1]

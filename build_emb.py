@@ -23,7 +23,6 @@ max_num_words = 0
 all_relations = []
 
 # how to split the relation
-# 提取关系编码
 if 'webqsp' in dataset:
     with open(rel_path) as f:
         first_line = True
