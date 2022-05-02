@@ -1,3 +1,7 @@
+# Seeing the wood for the trees: a contrastive regularization method for the low-resource Knowledge Base Question Answering
+This project hosts the codes for the paper:
+> [Seeing the wood for the trees: a contrastive regularization method for the low-resource Knowledge Base Question Answering] Junping Liu, Shijie Mei, Xinrong Hu, Xun Yao, JACK Yang, Yi Guo Accepted by Findings of NAACL 2022
+
 ### Requirements
 * ``PyTorch 1.0.1``
 * ``tensorboardX``
