@@ -23,7 +23,7 @@ class DataLoader():
         self.batch_size = config['batch_size'] if mode == 'train' else config['batch_size']
         self.max_rel_words = config['max_rel_words']
         self.type_rels = config['type_rels']
-        self.kb_ratio = config['kb_ratio']
+        self.fact_drop = config['fact_drop']
 
         # read all data
         self.data = []
@@ -213,11 +213,11 @@ class DataLoader():
                 # kb information
                 connections = defaultdict(list)
 
-                if self.kb_ratio and self.mode == 'train':
+                if self.fact_drop and self.mode == 'train':
                     all_triples = sample['subgraph']['tuples']
                     random.shuffle(all_triples)
                     num_triples = len(all_triples)
-                    all_triples = all_triples[:int(num_triples * self.kb_ratio)]
+                    all_triples = all_triples[:int(num_triples * self.fact_drop)]
 
                 else:
                     all_triples = sample['subgraph']['tuples']

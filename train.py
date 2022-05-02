@@ -75,11 +75,9 @@ class train():
         self.loss_simsiam = nn.CosineSimilarity(dim=1).to(self.device)
 
         if self.use_smoco:
-            self.encoder_q = KAReader(cfg).to(self.device)
             self.encoder_k = KAReader(cfg).to(self.device)
             self.dim_in = self.entity_dim * 4 if self.use_doc else self.entity_dim * 2
-            self.smoco = sMoCo(self.encoder_q, self.encoder_k, self.dim_in, K=self.K, momentum=cfg['momentum']).to(self.device)
-            self.model = self.smoco
+            self.smoco = sMoCo(self.model, self.encoder_k, self.dim_in, K=self.K, momentum=cfg['momentum']).to(self.device)
 
         self.trainable = filter(lambda p: p.requires_grad, self.model.parameters())
         self.optim = torch.optim.Adam(self.trainable, lr=cfg['learning_rate'])
@@ -118,7 +116,7 @@ class train():
                     feed_q, feed_k = get_q_k(feed, self.batch_size, flag=self.flag)
                     if len(feed_q[1]) == 0:
                         continue                    
-                    loss, logits, labels, score = self.model(feed_q, feed_k, batch_size=self.batch_size, normalize=self.normalize,
+                    loss, logits, labels, score = self.smoco(feed_q, feed_k, batch_size=self.batch_size, normalize=self.normalize,
                                                             mode=cfg['pos_mode'])
                     loss_cl = self.loss_bce(logits, labels)
                 else:
@@ -158,7 +156,7 @@ class train():
                     feed_q, feed_k = get_q_k(feed, self.batch_size, flag=self.flag)
                     if len(feed_q[1]) == 0:
                         continue
-                    loss, logits, labels, score = self.model(feed_q, feed_k, batch_size=self.batch_size,
+                    loss, logits, labels, score = self.smoco(feed_q, feed_k, batch_size=self.batch_size,
                                                             normalize=self.normalize,
                                                             mode=cfg['pos_mode'])
                     loss_cl = self.loss_bce(logits, labels)
@@ -199,7 +197,7 @@ class train():
                     feed_q, feed_k = get_q_k(feed, self.batch_size, flag=self.flag)
                     if len(feed_q[1]) == 0:
                         continue
-                    loss, logits, labels, score = self.model(feed_q, feed_k, batch_size=self.batch_size,
+                    loss, logits, labels, score = self.smoco(feed_q, feed_k, batch_size=self.batch_size,
                                                             normalize=self.normalize,
                                                             mode=cfg['pos_mode'])
                     loss_cl = self.loss_bce(logits, labels)

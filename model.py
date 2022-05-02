@@ -67,7 +67,6 @@ class KAReader(nn.Module):
         self.label_smooth = args['label_smooth']
         self.weight = args['weight']
         self.use_inverse_relation = args['use_inverse_relation']
-        self.use_moco = args['use_moco']
 
         for k, v in args.items():
             if k.endswith('dim'):
