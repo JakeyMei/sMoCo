@@ -18,14 +18,6 @@ mkdir datasets && cd datasets && wget https://sites.cs.ucsb.edu/~xwhan/datasets/
 ```
 - [WebQSP-expand_data & train-model](https://github.com/JakeyMei/test/releases/tag/v1.0)
 
-- you can also follow the following commands to expand new samples：
-```
-cd new_sample_generator
-python rank_data.py --data_folder ../datasets/webqsp/kb_01/ --save_path ../datasets/new_samples/kb_01/
-```
-
-
-
 #### Full KB setting
 ```
 CUDA_VISIBLE_DEVICES=0 python train.py --max_num_neighbors 50 --label_smooth 0.1 --data_folder datasets/webqsp/full/ --train_data new_data.json --model_id full --weight 0.2 --batch_size 16 --use_smoco --pos_mode hard
