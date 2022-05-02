@@ -15,6 +15,13 @@ mkdir datasets && cd datasets && wget https://sites.cs.ucsb.edu/~xwhan/datasets/
 ```
 - [WebQSP-expand_data & train-model](https://github.com/JakeyMei/test/releases/tag/v1.0)
 
+- you can also follow the following commands to expand new samples：
+
+```
+cd new_sample_generator
+python rank_data.py --data_folder ../datasets/webqsp/kb_01/ --save_path ../datasets/new_samples/kb_01/
+```
+
 
 
 #### Full KB setting
