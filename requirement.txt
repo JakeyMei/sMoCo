@@ -1,0 +1,11 @@
+networkx
+matplotlib
+bs4
+nltk
+tqdm
+pyyaml
+pandas
+tensorboard
+tensorboardX
+mxnet-cu100 
+gluonnlp
