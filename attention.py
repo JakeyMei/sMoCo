@@ -7,16 +7,15 @@ import math
 
 def attention(query, key, value, mask=None, dropout=None):
     "Compute 'Scaled Dot Product Attention'"
-    d_k = query.size(-1)  # Q、K向量维度
+    d_k = query.size(-1) 
     scores = torch.matmul(query, key.transpose(-2, -1)) \
-             / math.sqrt(d_k)  # query和key进行相似度计算，得到匹配分数（相关度）
-    if mask is not None:  # 在这里不选择Mask操作
+             / math.sqrt(d_k)
+    if mask is not None:
         scores = scores.masked_fill(mask == 0, -1e9)
-    p_attn = F.softmax(scores, dim=-1)  # 将分数归一化为概率分布
-    if dropout is not None:  # 正则化
+    p_attn = F.softmax(scores, dim=-1)
+    if dropout is not None: 
         p_attn = dropout(p_attn)
-    return torch.matmul(p_attn, value), p_attn  # 将概率分布与矩阵V得到权重的求和表示
-
+    return torch.matmul(p_attn, value), p_attn 
 
 def clones(module, N):
     "Produce N identical layers."
