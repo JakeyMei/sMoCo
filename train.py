@@ -148,7 +148,7 @@ class train():
     def train_alternate(self):
         for epoch in range(self.num_epochs):
             w = 1 if (epoch+1) % 5 == 0 else 0
-            batcher = self.train_data.batcher(shuffle=True)  # 选取8条数据
+            batcher = self.train_data.batcher(shuffle=True)
             train_loss = []
             for feed in batcher:
                 loss_cl = 0
@@ -189,7 +189,7 @@ class train():
     def train_serial(self):
         for epoch in range(self.num_epochs):
             w = 1 if epoch < 20 else 0
-            batcher = self.train_data.batcher(shuffle=True)  # 选取8条数据
+            batcher = self.train_data.batcher(shuffle=True)
             train_loss = []
             for feed in batcher:
                 loss_cl = 0
