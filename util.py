@@ -116,7 +116,7 @@ def load_model(path):
     print("loading model from ...", path)
     return torch.load(path)
 
-# 将数据集转换成word2id字典形式
+
 def load_dict(filename):
     word2id = dict()
     with open(filename, encoding='utf-8') as f_in:
@@ -157,21 +157,20 @@ def cal_accuracy(pred, answer_dist):
     return num_correct / len(pred), num_answerable / len(pred)
 
 def char_vocab(word2id, data_path):
-    # build char embeddings
-    # 提取KB文档字符，构建字符embeddings
+    # build char embeddings    
     char_counter = Counter()
     max_char = 0
     with open(word2id, encoding='utf-8') as f:
-        for word in f:  # 提取KB文档单词
-            word = word.strip()  # 去除空格
-            max_char = max(max_char, len(word))  # 取出文档中数量
-            for char in word:  # 提取单词中的字母和字符
+        for word in f:
+            word = word.strip()
+            max_char = max(max_char, len(word))
+            for char in word:
                 char_counter[char] += 1
 
-    char2id = {c: idx for idx, c in enumerate(char_counter.keys(), 1)}  # 统计每个字符的出现次数
+    char2id = {c: idx for idx, c in enumerate(char_counter.keys(), 1)}
     char2id['__unk__'] = 0
 
-    id2char = {id_: c for c, id_ in char2id.items()}  # 按出现次数升序对字符进行排序
+    id2char = {id_: c for c, id_ in char2id.items()}
 
     vocab_size = len(char2id)
     char_vocabs = []
@@ -294,4 +293,4 @@ def get_q_k(feed, batch_size, flag=2):
 
 if __name__  == "__main__":
     # load_documents('datasets/wikimovie/full_doc/documents.json')
-    char_vocab('datasets/webqsp/kb_05/vocab.txt', 'datasets/webqsp/kb_05/chars.txt')  # 单词文本，
+    char_vocab('datasets/webqsp/kb_05/vocab.txt', 'datasets/webqsp/kb_05/chars.txt')
