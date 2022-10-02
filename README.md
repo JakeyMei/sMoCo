@@ -16,7 +16,7 @@ This project hosts the codes for the paper:
 ```
 mkdir datasets && cd datasets && wget https://sites.cs.ucsb.edu/~xwhan/datasets/webqsp.tar.gz && tar -xzvf webqsp.tar.gz && cd ..
 ```
-- [WebQSP-expand_data & train-model](https://github.com/JakeyMei/test/releases/tag/v1.0)
+- [WebQSP-expand_data & train-model](https://github.com/JakeyMei/sMoCo/releases/tag/v1.0.0)
 
 #### Full KB setting
 ```
